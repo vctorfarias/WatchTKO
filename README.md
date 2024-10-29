@@ -18,11 +18,11 @@ Coloque o `history.csv` na pasta `./history` e adicione no topo do arquivo `id,d
 
 ## Como eu gostaria de estruturar os arquivos
 
-- history
-  - .tko-nomeDeUsuario1github
+- data
+  - .tko-nome-de-usuario
     - history.csv
     - daily.json
-  - .tko-nomeDeUsuario2github
+  - .tko-nome-de-usuario
     - history.csv
     - daily.json
 - index.html
