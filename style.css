@@ -1,0 +1,19 @@
+.noselect {
+    user-select: none; /* Para navegadores modernos */
+    -webkit-user-select: none; /* Para Safari */
+    -moz-user-select: none; /* Para Firefox */
+    -ms-user-select: none; /* Para Internet Explorer/Edge */
+}
+
+svg {
+    border: 1px solid black;
+    padding: 20px;         /* Adiciona um padding de 20px */
+}
+
+body {
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;    /* Centraliza verticalmente */
+    height: 100vh;         /* Define altura total da janela */
+    margin: 0;             /* Remove margens do body */
+}
