@@ -1,4 +1,6 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import createLine from "./util/createLine.js";
+import createChartData from "./util/createChartData.js";
 
 const container = document.getElementById("graph");
 const svg = d3.create("svg").attr("width", 800).attr("height", 600);
@@ -9,6 +11,9 @@ const stroke_line = 3.0;
 const circle_big_size = 3.0;
 const circle_small_size = 3.0;
 
+const data = []
+const lines = []
+
 const tooltip = d3.select(container)
     .append("div")
     .attr("class", "tooltip")
@@ -18,58 +23,12 @@ const tooltip = d3.select(container)
     .style("border", "1px solid black")
     .style("padding", "5px");
 
-function createLine(chartData, x, y, options = {}) {
-    const { color = "green", stroke = 3 } = options;
-    let pathData = "";
-    for (let i = 0; i < chartData.length; i++) {
-        const xPos = x(chartData[i].date);
-        const yPos = y(chartData[i].value);
-
-        if (i === 0) {
-            pathData += `M ${xPos} ${yPos} `;
-        } else {
-            const prevY = y(chartData[i - 1].value);
-            // Linha vertical até o ponto anterior
-            pathData += `V ${prevY} `;
-            // Linha horizontal até o ponto atual
-            pathData += `H ${xPos} `;
-            // Linha vertical até o valor atual
-            pathData += `V ${yPos} `;
-        }
-    }
-
-    const linePath = svg.append("path")
-        .datum(chartData)
-        .attr("fill", "none")
-        .attr("stroke", color)
-        .attr("stroke-width", stroke)
-        .attr("d", pathData);
-
-    return linePath;
-}
-
 async function main() {
     const data = await d3.csv("./scripts/data/history-vctorfarias.csv");
     const data2 = await d3.csv("./scripts/data/history-vctorfarias2.csv");
 
-    // Filtra apenas as linhas com "TEST" no tipo
-    const testData = data.filter(d => d.type === "TEST");
-
-    let accumulative = 0;
-    let question_acc = {};
-
-    const chartData = Object.entries(testData).map(([question_id, question]) => {
-        question_acc[question.command] = question.value;
-        accumulative = Object.values(question_acc).reduce((total, value ) => total + Number(value), 0);
-        
-        return {
-            question_id,
-            value: accumulative,
-            date: new Date(question.date),
-            question,
-        };
-    });
-
+    const chartData = createChartData(data);
+    const chartData2 = createChartData(data2);
     // Configuração das escalas
     const x = d3.scaleTime()
         .domain(d3.extent(chartData, d => d.date))
@@ -94,9 +53,10 @@ async function main() {
         .attr("class", "axis-y"); // Classe para estilização, se necessário
 
     // Adiciona a linha ao SVG
-    // TODO
-    const linePath = createLine(chartData, x, y)
+    const linePath = createLine(chartData, svg, x, y)
+    const linePath2 = createLine(chartData2, svg, x, y, {color: "blue"})
 
+    /*
     linePath.on("mouseover", () => tooltip.transition().duration(200).style("opacity", 1) )
         .on("mousemove", (event) => {
             // Obtenha a posição do mouse e converta em tempo
@@ -111,6 +71,7 @@ async function main() {
         .on("mouseout", () => {
             tooltip.style("opacity", 0);
         });
+    */
 
     svg.selectAll("dot")
         .data(chartData.filter(d => Number(d.question.value) === 100))
@@ -147,7 +108,7 @@ async function main() {
             window.open("https://github.com/vctorfarias", "_blank");
         })
         .on("mouseover", (event, d) => {
-            tooltip.transition().duration(200).style("opacity", 1);
+            tooltip.transition().style("opacity", 1);
             tooltip.html(`Github: vctorfarias<br>Questão: @${d.question.command}<br>Nota: ${d.question.value}<br>Data: ${d.date.toLocaleString()}`)
                 .style("left", (event.pageX + 5) + "px")
                 .style("top", (event.pageY - 28) + "px");
@@ -157,13 +118,13 @@ async function main() {
                 .style("top", (event.pageY - 28) + "px");
         })
         .on("mouseout", () => {
-            tooltip.transition().duration(500).style("opacity", 0);
+            tooltip.transition().style("opacity", 0);
         });
 
     const zoom = d3.zoom()
         .scaleExtent([0.5, 150])
         .on("zoom", zoomed);
-
+        
     const gGrid = svg.append("g");
 
     const gx = svg.append("g");
@@ -174,6 +135,10 @@ async function main() {
     function zoomed({transform}) {
         const zx = transform.rescaleX(x);
         const zy = transform.rescaleY(y);
+        
+        gGrid.call(d3.axisLeft(zy).tickSize(-width).tickFormat("")).selectAll("line")
+            .attr("stroke", "rgba(200, 200, 200, 0.5)")
+            .attr("stroke-width", 1);
         
         gy.call(yAxis.scale(zy))
         gx.call(xAxis.scale(zx))
@@ -192,9 +157,15 @@ async function main() {
             return `V ${prevY} H ${xPos} V ${yPos}`;
         }).join(" "));
 
-        gGrid.call(d3.axisLeft(zy).tickSize(-width).tickFormat("")).selectAll("line")
-            .attr("stroke", "rgba(200, 200, 200, 0.5)")
-            .attr("stroke-width", 1);
+        linePath2.attr("d", chartData2.map((d, i) => {
+            const xPos = zx(d.date);
+            const yPos = zy(d.value);
+
+            if (i === 0) return `M ${xPos} ${yPos}`;
+            const prevY = zy(chartData2[i - 1].value);
+            return `V ${prevY} H ${xPos} V ${yPos}`;
+        }).join(" "));
+
     }
 
     svg.transition()
