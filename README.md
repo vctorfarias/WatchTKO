@@ -2,7 +2,7 @@
 
 ## TODO
 
-- desacoplar código para criando funções e objetos;
+- desacoplar código para criando funções e classes;
 - conseguir criar múltiplas linhas;
 - conseguir ler múltiplos arquivos de histórico.
 - criar uma classe só para processar os dados do `./history` adicionando no topo do texto `id,date,type,command,value`;
