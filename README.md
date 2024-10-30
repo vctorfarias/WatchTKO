@@ -19,12 +19,14 @@ Coloque o `history.csv` na pasta `./history` e adicione no topo do arquivo `id,d
 ## Como eu gostaria de estruturar os arquivos
 
 - data
-  - .tko-nome-de-usuario
-    - history.csv
-    - daily.json
-  - .tko-nome-de-usuario
-    - history.csv
-    - daily.json
+  - nomde-de-usuario 
+    - .tko
+      - history.csv
+      - daily.json
+  - nomde-de-usuario
+    - .tko
+      - history.csv
+      - daily.json
 - index.html
 - styles
   - ... TODO 
