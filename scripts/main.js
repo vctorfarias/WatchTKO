@@ -1,15 +1,14 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import createLine from "./util/createLine.js";
 import createChartData from "./util/createChartData.js";
 
 const container = document.getElementById("graph");
-const svg = d3.create("svg").attr("width", 800).attr("height", 600);
+const svg = d3.create("svg").attr("width", 1000).attr("height", 800);
 const margin = { top: 60, right: 0, bottom: 0, left: 0 };
 const width = +svg.attr("width") - margin.left - margin.right;
 const height = +svg.attr("height") - margin.top - margin.bottom;
-const stroke_line = 3.0;
-const circle_big_size = 3.0;
-const circle_small_size = 3.0;
+const stroke_line = 5.0;
+const circle_big_radius = 6.0;
+const circle_small_radius = 5.0;
 
 const data = []
 const lines = []
@@ -29,6 +28,7 @@ async function main() {
 
     const chartData = createChartData(data);
     const chartData2 = createChartData(data2);
+    
     // Configuração das escalas
     const x = d3.scaleTime()
         .domain(d3.extent(chartData, d => d.date))
@@ -38,25 +38,29 @@ async function main() {
         .domain([0, d3.max(chartData, d => d.value) + 100])
         .range([height, 0]);
         
-    // Criação dos eixos
-    const xAxis = d3.axisBottom(x)
+        // Criação dos eixos
+        const xAxis = d3.axisBottom(x)
         .ticks(d3.timeDay.every(0.5)) // Define intervalos de 1 dia
         .tickFormat(d3.timeFormat("%d/%m %H:%M")) // Formata as datas
-
-    const yAxis = d3.axisRight(y).ticks(10);
-
-    svg.append("g")
+        
+        const yAxis = d3.axisRight(y).ticks(10);
+        
+        svg.append("g")
         .attr("class", "axis-x")
         .attr("transform", `translate(0,${height})`);
-
-    svg.append("g")
+        
+        svg.append("g")
         .attr("class", "axis-y"); // Classe para estilização, se necessário
-
+        
     // Adiciona a linha ao SVG
-    const linePath = createLine(chartData, svg, x, y)
-    const linePath2 = createLine(chartData2, svg, x, y, {color: "blue"})
+    const gGrid = svg.append("g");
+    
+    const gx = svg.append("g");
+    const gy = svg.append("g");
 
-    /*
+    const linePath = createLine(chartData, svg, x, y, {color: "green", stroke: stroke_line})
+    const linePath2 = createLine(chartData2, svg, x, y, {color: "blue", stroke: stroke_line})
+    
     linePath.on("mouseover", () => tooltip.transition().duration(200).style("opacity", 1) )
         .on("mousemove", (event) => {
             // Obtenha a posição do mouse e converta em tempo
@@ -71,14 +75,14 @@ async function main() {
         .on("mouseout", () => {
             tooltip.style("opacity", 0);
         });
-    */
+    
 
     svg.selectAll("dot")
         .data(chartData.filter(d => Number(d.question.value) === 100))
         .enter().append("circle")
         .attr("cx", d => x(d.date))
         .attr("cy", d => y(d.value))
-        .attr("r", circle_big_size)
+        .attr("r", circle_big_radius)
         .attr("fill", "green")
         .on("click", (event, d) => {
             window.open("https://github.com/vctorfarias", "_blank");
@@ -102,7 +106,7 @@ async function main() {
         .enter().append("circle")
         .attr("cx", d => x(d.date))
         .attr("cy", d => y(d.value))
-        .attr("r", circle_small_size)
+        .attr("r", circle_small_radius)
         .attr("fill", "green")
         .on("click", (event, d) => {
             window.open("https://github.com/vctorfarias", "_blank");
@@ -125,10 +129,7 @@ async function main() {
         .scaleExtent([0.5, 150])
         .on("zoom", zoomed);
         
-    const gGrid = svg.append("g");
 
-    const gx = svg.append("g");
-    const gy = svg.append("g");
 
     svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
 
