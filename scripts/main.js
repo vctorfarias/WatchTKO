@@ -1,33 +1,27 @@
 import createLine from "./util/createLine.js";
 import createChartData from "./util/createChartData.js";
 
-const container = document.getElementById("graph");
-const svg = d3.create("svg").attr("width", 1000).attr("height", 800);
-const margin = { top: 60, right: 0, bottom: 0, left: 0 };
-const width = +svg.attr("width") - margin.left - margin.right;
-const height = +svg.attr("height") - margin.top - margin.bottom;
-const stroke_line = 5.0;
-const circle_big_radius = 6.0;
-const circle_small_radius = 5.0;
+async function main() {
+    const container = document.getElementById("graph");
+    const svg = d3.create("svg").attr("width", 1000).attr("height", 800);
+    const margin = { top: 60, right: 0, bottom: 0, left: 0 };
+    const width = +svg.attr("width") - margin.left - margin.right;
+    const height = +svg.attr("height") - margin.top - margin.bottom;
+    const stroke_line = 5.0;
+    const circle_big_radius = 6.0;
+    const circle_small_radius = 5.0;
 
-const data = []
-const lines = []
-
-const tooltip = d3.select(container)
+    const tooltip = d3.select(container)
     .append("div")
     .attr("class", "tooltip")
     .style("opacity", 0)
-    .style("position", "absolute")
-    .style("background", "white")
-    .style("border", "1px solid black")
-    .style("padding", "5px");
-
-async function main() {
-    const data = await d3.csv("./scripts/data/history-vctorfarias.csv");
-    const data2 = await d3.csv("./scripts/data/history-vctorfarias2.csv");
-
+        .style("position", "absolute")
+        .style("background", "white")
+        .style("border", "1px solid black")
+        .style("padding", "5px");
+        
+    const data = await d3.csv("./scripts/data/vctorfarias/.tko/history.csv");
     const chartData = createChartData(data);
-    const chartData2 = createChartData(data2);
     
     // Configuração das escalas
     const x = d3.scaleTime()
@@ -38,28 +32,27 @@ async function main() {
         .domain([0, d3.max(chartData, d => d.value) + 100])
         .range([height, 0]);
         
-        // Criação dos eixos
-        const xAxis = d3.axisBottom(x)
+    // Criação dos eixos
+    const xAxis = d3.axisBottom(x)
         .ticks(d3.timeDay.every(0.5)) // Define intervalos de 1 dia
         .tickFormat(d3.timeFormat("%d/%m %H:%M")) // Formata as datas
-        
-        const yAxis = d3.axisRight(y).ticks(10);
-        
-        svg.append("g")
+    
+    const yAxis = d3.axisRight(y).ticks(10);
+    
+    svg.append("g")
         .attr("class", "axis-x")
         .attr("transform", `translate(0,${height})`);
+    
+    svg.append("g")
+        .attr("class", "axis-y");
         
-        svg.append("g")
-        .attr("class", "axis-y"); // Classe para estilização, se necessário
-        
-    // Adiciona a linha ao SVG
+    // Adiciona o Grid (as linhas)
     const gGrid = svg.append("g");
     
     const gx = svg.append("g");
     const gy = svg.append("g");
 
     const linePath = createLine(chartData, svg, x, y, {color: "green", stroke: stroke_line})
-    const linePath2 = createLine(chartData2, svg, x, y, {color: "blue", stroke: stroke_line})
     
     linePath.on("mouseover", () => tooltip.transition().duration(200).style("opacity", 1) )
         .on("mousemove", (event) => {
@@ -75,7 +68,6 @@ async function main() {
         .on("mouseout", () => {
             tooltip.style("opacity", 0);
         });
-    
 
     svg.selectAll("dot")
         .data(chartData.filter(d => Number(d.question.value) === 100))
@@ -129,8 +121,6 @@ async function main() {
         .scaleExtent([0.5, 150])
         .on("zoom", zoomed);
         
-
-
     svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
 
     function zoomed({transform}) {
@@ -157,16 +147,6 @@ async function main() {
             const prevY = zy(chartData[i - 1].value);
             return `V ${prevY} H ${xPos} V ${yPos}`;
         }).join(" "));
-
-        linePath2.attr("d", chartData2.map((d, i) => {
-            const xPos = zx(d.date);
-            const yPos = zy(d.value);
-
-            if (i === 0) return `M ${xPos} ${yPos}`;
-            const prevY = zy(chartData2[i - 1].value);
-            return `V ${prevY} H ${xPos} V ${yPos}`;
-        }).join(" "));
-
     }
 
     svg.transition()
