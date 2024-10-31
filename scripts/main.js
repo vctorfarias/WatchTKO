@@ -21,7 +21,8 @@ async function main() {
         .style("padding", "5px");
         
     const data = await d3.csv("./scripts/data/vctorfarias/.tko/history.csv");
-    const chartData = createChartData(data);
+    const chartData = createChartData(data, "TEST");
+    // const chartData = createChartData(data, "SELF");
     
     // Configuração das escalas
     const x = d3.scaleTime()
