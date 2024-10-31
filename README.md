@@ -1,12 +1,15 @@
 # WatchTKO
 
+![exemplo](example.gif)
+
 ## TODO
 
-- desacoplar código para criando funções e classes;
+- desacoplar código criando funções e classes;
 - conseguir criar múltiplas linhas;
 - conseguir ler múltiplos arquivos de histórico.
-- criar uma classe só para processar os dados do `./history` adicionando no topo do texto `id,date,type,command,value`;
-- ultilizar a API do github coletar os dados de nome de usuário e foto;
+- criar uma classe só para processar os dados do `./history` adicionando no topo do texto `hash,date,type,command,value`;
+  - validar o hash
+- ultilizar a API do github para coletar os dados de nome e foto;
 - melhorar a interface gráfica;
 - otimizar o código com cache;
 - criar filtros;
@@ -14,16 +17,18 @@
 
 ## Como usar?
 
-Coloque o `history.csv` na pasta `./history` e adicione no topo do arquivo `id,date,type,command,value` para realizar leitura dos dados das colunas
+Coloque o `history.csv` na pasta `./scripts/data/vctorfarias/.tko` e adicione no topo do arquivo `hash,date,type,command,value` para realizar leitura dos dados das colunas
+
+Ainda não é possível plotar o gráfico de vários alunos.
 
 ## Como eu gostaria de estruturar os arquivos
 
 - data
-  - nomde-de-usuario 
+  - nome-de-usuario 
     - .tko
       - history.csv
       - daily.json
-  - nomde-de-usuario
+  - nome-de-usuario
     - .tko
       - history.csv
       - daily.json
