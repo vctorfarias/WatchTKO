@@ -17,7 +17,8 @@
 
 ## Como usar?
 
-Coloque o `history.csv` na pasta `./scripts/data/vctorfarias/.tko` e adicione no topo do arquivo `hash,date,type,command,value` para realizar leitura dos dados das colunas
+1. Coloque o `history.csv` na pasta `./scripts/data/vctorfarias/.tko` e adicione no topo do arquivo `hash,date,type,command,value` para realizar leitura dos dados das colunas.
+2. Abra o `index.html`
 
 Ainda não é possível plotar o gráfico de vários alunos.
 
