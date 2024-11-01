@@ -12,9 +12,9 @@ async function main() {
     const circle_small_radius = 5.0;
 
     const tooltip = d3.select(container)
-    .append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0)
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
         .style("position", "absolute")
         .style("background", "white")
         .style("border", "1px solid black")
@@ -54,8 +54,10 @@ async function main() {
     const gy = svg.append("g");
 
     const linePath = createLine(chartData, svg, x, y, {color: "green", stroke: stroke_line})
+    const linePathCollision = createLine(chartData, svg, x, y, {color: "rgba(0,0,0,0)", stroke: 15})
+    // const linePathCollision = createLine(chartData, svg, x, y, {color: "red", stroke: 10})
     
-    linePath.on("mouseover", () => tooltip.transition().duration(200).style("opacity", 1) )
+    linePathCollision.on("mouseover", () => tooltip.style("opacity", 1) )
         .on("mousemove", (event) => {
             // Obtenha a posição do mouse e converta em tempo
             const xPos = d3.pointer(event)[0];
@@ -63,10 +65,12 @@ async function main() {
         
             // Atualiza o conteúdo do tooltip
             tooltip.html(`Data: ${date.toLocaleString()}`) // Adicione mais informações conforme necessário
-                .style("left", (event.pageX + 50) + "px")
-                .style("top", (event.pageY - 28) + "px");
+                .style("left", (event.pageX - 100) + "px")
+                .style("top", (event.pageY - 50) + "px")
+                .style("opacity", 1);
         })
         .on("mouseout", () => {
+            console.log("saiu")
             tooltip.style("opacity", 0);
         });
 
@@ -81,17 +85,17 @@ async function main() {
             window.open("https://github.com/vctorfarias", "_blank");
         })
         .on("mouseover", (event, d) => {
-            tooltip.transition().duration(200).style("opacity", 1);
             tooltip.html(`Github: vctorfarias<br>Questão: @${d.question.command}<br>Nota: ${d.question.value}<br>Data: ${d.date.toLocaleString()}`)
-                .style("left", (event.pageX + 5) + "px")
-                .style("top", (event.pageY - 28) + "px");
+                .style("left", (event.pageX - 100) + "px")
+                .style("top", (event.pageY - 150) + "px")
+                .style("opacity", 1);
         })
         .on("mousemove", (event) => {
-            tooltip.style("left", (event.pageX + 5) + "px")
-                .style("top", (event.pageY - 28) + "px");
+            tooltip.style("left", (event.pageX - 100) + "px")
+                .style("top", (event.pageY - 150) + "px").style("opacity", 1);
         })
         .on("mouseout", () => {
-            tooltip.transition().duration(500).style("opacity", 0);
+            tooltip.style("opacity", 0);
         });
     
     svg.selectAll("dot")
@@ -105,17 +109,18 @@ async function main() {
             window.open("https://github.com/vctorfarias", "_blank");
         })
         .on("mouseover", (event, d) => {
-            tooltip.transition().style("opacity", 1);
+            tooltip.style("opacity", 1);
             tooltip.html(`Github: vctorfarias<br>Questão: @${d.question.command}<br>Nota: ${d.question.value}<br>Data: ${d.date.toLocaleString()}`)
-                .style("left", (event.pageX + 5) + "px")
-                .style("top", (event.pageY - 28) + "px");
+                .style("left", (event.pageX - 100) + "px")
+                .style("top", (event.pageY - 150) + "px");
         })
         .on("mousemove", (event) => {
-            tooltip.style("left", (event.pageX + 5) + "px")
-                .style("top", (event.pageY - 28) + "px");
+            tooltip.style("opacity", 1);
+            tooltip.style("left", (event.pageX - 100) + "px")
+                .style("top", (event.pageY - 150) + "px");
         })
         .on("mouseout", () => {
-            tooltip.transition().style("opacity", 0);
+            tooltip.style("opacity", 0);
         });
 
     const zoom = d3.zoom()
@@ -141,6 +146,15 @@ async function main() {
             .attr("cy", d => zy(d.value));
 
         linePath.attr("d", chartData.map((d, i) => {
+                const xPos = zx(d.date);
+                const yPos = zy(d.value);
+    
+                if (i === 0) return `M ${xPos} ${yPos}`;
+                const prevY = zy(chartData[i - 1].value);
+                return `V ${prevY} H ${xPos} V ${yPos}`;
+            }).join(" "));
+
+        linePathCollision.attr("d", chartData.map((d, i) => {
             const xPos = zx(d.date);
             const yPos = zy(d.value);
 
