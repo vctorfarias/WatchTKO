@@ -2,6 +2,10 @@ import createLine from "./util/createLine.js";
 import createLineCollision from "./util/createLineCollision.js"
 import createChartData from "./util/createChartData.js";
 import loadData from "./util/loadData.js"
+import Student from "./classes/student.js"
+import Line from "./classes/line.js"
+import Tooltip from "./classes/tooltip.js";
+import loadStudents from "./util/loadStudents.js";
 
 async function main() {
     const container = document.getElementById("graph");
@@ -22,26 +26,24 @@ async function main() {
         .style("border", "1px solid black")
         .style("padding", "5px");
         
-    const data = await d3.csv("./scripts/data/vctorfarias/.tko/history.csv");
-    const datas = await loadData();
+    const students = await loadStudents();
+    console.log(students)
+    //const chartsData = []
+    //datas.forEach(data => {
+    //    chartsData.push(createChartData(data, "TEST"))
+    //});
 
-    const chartData = createChartData(data, "TEST");
-    const chartsData = []
-    datas.forEach(data => {
-        chartsData.push(createChartData(data, "TEST"))
-    });
-
-    console.log(chartsData)
-
+    //const aluno  = new Student("vctorfarias", "Victor Farias", "", chartsData[0]);
+    //const aluno2  = new Student("joaofarias", "João Farias", "", chartsData[1]);
     // const chartData = createChartData(data, "SELF");
     
     // Configuração das escalas
     const x = d3.scaleTime()
-        .domain(d3.extent(chartData, d => d.date))
+        .domain(d3.extent(students[0].chartData, d => d.date))
         .range([0, width]);
 
     const y = d3.scaleLinear()
-        .domain([0, d3.max(chartData, d => d.value) + 100])
+        .domain([0, d3.max(students[0].chartData, d => d.value) + 100])
         .range([height, 0]);
         
     // Criação dos eixos
@@ -64,25 +66,12 @@ async function main() {
     const gx = svg.append("g");
     const gy = svg.append("g");
 
-    const linePath = createLine(chartData, svg, x, y, {color: "green", stroke: stroke_line})
-    const linePathCollision = createLineCollision(chartData, svg, x, y)
-
-    const linesPath = []
-    const linesPathCollision = []
-
-    chartsData.forEach(chartData => {
-        let linePath = createLine(chartData, svg, x, y, {color: "green", stroke: stroke_line})
-        linesPath.push(linePath);
+    const lines = []
+    students.forEach(student => {
+        lines.push(new Line(svg, student, x, y));
     })
 
-    console.log(chartsData)
-
-    chartsData.forEach(chartData => {
-        linesPathCollision.push(createLineCollision(chartData, svg, x, y));
-    })
-    
-    console.log(linesPath)
-
+    /*
     svg.selectAll(".path-collision")
         .on("mouseover", () => tooltip.style("opacity", 1) )
         .on("mousemove", (event) => {
@@ -150,11 +139,12 @@ async function main() {
             tooltip.style("opacity", 0);
         });
 
+    */
+
     const zoom = d3.zoom()
         .scaleExtent([0.25, 150])
         .on("zoom", zoomed);
 
-    let dataPath = ""
     let datasPath = []
     function zoomed({transform}) {
         requestAnimationFrame(() => {
@@ -173,37 +163,8 @@ async function main() {
                 .attr("cx", d => zx(d.date))
                 .attr("cy", d => zy(d.value));
 
-            dataPath = chartData.map((d, i) => {
-                const xPos = zx(d.date);
-                const yPos = zy(d.value);
-
-                if (i === 0) return `M ${xPos} ${yPos}`;
-                const prevY = zy(chartData[i - 1].value);
-                return `V ${prevY} H ${xPos} V ${yPos}`;
-            }).join(" ")
-
-            datasPath = []
-            chartsData.forEach(chartData => {
-                let dataPath = chartData.map((d, i) => {
-                    const xPos = zx(d.date);
-                    const yPos = zy(d.value);
-
-                    if (i === 0) return `M ${xPos} ${yPos}`;
-                    const prevY = zy(chartData[i - 1].value);
-                    return `V ${prevY} H ${xPos} V ${yPos}`;
-                }).join(" ")
-                datasPath.push(dataPath);
-            })
-
-            linePath.attr("d", dataPath);
-            linePathCollision.attr("d", dataPath);
-
-            linesPath.forEach((linePath, i) => {
-                linePath.attr("d", datasPath[i]);
-            })
-
-            linesPathCollision.forEach((linePath, i) => {
-                linePath.attr("d", datasPath[i]);
+            lines.forEach(line => {
+                line.update(zx, zy)
             })
         })
     }
@@ -211,7 +172,7 @@ async function main() {
     svg.call(zoom);
 
     svg.transition()
-        .duration(750)
+        .duration(0)
         .call(zoom.transform, d3.zoomIdentity);   
 
     container.appendChild(svg.node());

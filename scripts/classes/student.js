@@ -1,10 +1,12 @@
-import Line from "./line"
-import Github from "./github";
+import createChartData from "../util/createChartData.js";
 
 export default class Student {
-    constructor(nick, chartData) {
+    constructor(nick, name, avatar, data) {
         this.nick = nick;
-        this.color = colorScale(this.name);
-        this.chartData = chartData;
+        this.name = name;
+        this.avatar = avatar;
+        this.color = "green";
+        this.data = data;
+        this.chartData = createChartData(this.data);
     }
 }
