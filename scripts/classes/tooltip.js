@@ -1,8 +1,6 @@
 export default class Tooltip {
     constructor(container) {
-        this.nick = "";
-        this.name = "";
-        this.avatar = "";
+        this.student = undefined;
 
         this.tip = d3.select(container)
             .append("div")
@@ -14,32 +12,18 @@ export default class Tooltip {
             .style("padding", "5px");
     }
 
-    setUser(student) {
-        this.nick = student.nick;
-        this.name = student.name;
-        this.avatar = student.avatar;
+    setStudent(student) {
+        this.student = student;
         return this;
     }
 
-    tooptipUpdateContent(data) {
-        this.tip.html(`${this.name}<br>@${this.nick}<br>Questão: @${data.question}<br>Nota: ${data.value}<br>Data: ${data.date}`)
+    updateContent(data) {
+        this.tip.html(`${this.student.name}<br>@${this.student.nick}<br>Questão: @${data.question}<br>Nota: ${data.value}<br>Data: ${data.date}`);
         return this;
     }
 
-    tooltipMove(x, y, data) {
-       /**
-         * Move the tooltip to a specified position and updates its content.
-         * 
-         * @param {number} x - The x-coordinate for the tooltip's position.
-         * @param {number} y - The y-coordinate for the tooltip's position.
-         * @param {Object} data - The data object containing information for the tooltip.
-         * @param {string} data.question - The question associated with the tooltip.
-         * @param {number} data.value - The score or value related to the question.
-         * @param {string} data.date - The date associated with the score.
-         * 
-         * @returns {this} - Returns the instance for method chaining.
-         */
-        this.tip.html(`${this.name}<br>@${this.nick}<br>Questão: @${data.question}<br>Nota: ${data.value}<br>Data: ${data.date}`)
+    move(x, y) {
+        this.tip
             .style("left", (x - 100) + "px")
             .style("top", (y - 150) + "px")
             .style("opacity", 1);

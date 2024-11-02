@@ -1,6 +1,4 @@
 function createChartData(data, type = "TEST") {
-    
-
     // Filtra apenas as linhas com type no tipo
     const testData = data.filter(d => d.type === type);
 

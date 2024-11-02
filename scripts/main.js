@@ -1,5 +1,7 @@
 import createLine from "./util/createLine.js";
+import createLineCollision from "./util/createLineCollision.js"
 import createChartData from "./util/createChartData.js";
+import loadData from "./util/loadData.js"
 
 async function main() {
     const container = document.getElementById("graph");
@@ -21,7 +23,16 @@ async function main() {
         .style("padding", "5px");
         
     const data = await d3.csv("./scripts/data/vctorfarias/.tko/history.csv");
+    const datas = await loadData();
+
     const chartData = createChartData(data, "TEST");
+    const chartsData = []
+    datas.forEach(data => {
+        chartsData.push(createChartData(data, "TEST"))
+    });
+
+    console.log(chartsData)
+
     // const chartData = createChartData(data, "SELF");
     
     // Configuração das escalas
@@ -54,10 +65,26 @@ async function main() {
     const gy = svg.append("g");
 
     const linePath = createLine(chartData, svg, x, y, {color: "green", stroke: stroke_line})
-    const linePathCollision = createLine(chartData, svg, x, y, {color: "rgba(0,0,0,0)", stroke: 15})
-    // const linePathCollision = createLine(chartData, svg, x, y, {color: "red", stroke: 10})
+    const linePathCollision = createLineCollision(chartData, svg, x, y)
+
+    const linesPath = []
+    const linesPathCollision = []
+
+    chartsData.forEach(chartData => {
+        let linePath = createLine(chartData, svg, x, y, {color: "green", stroke: stroke_line})
+        linesPath.push(linePath);
+    })
+
+    console.log(chartsData)
+
+    chartsData.forEach(chartData => {
+        linesPathCollision.push(createLineCollision(chartData, svg, x, y));
+    })
     
-    linePathCollision.on("mouseover", () => tooltip.style("opacity", 1) )
+    console.log(linesPath)
+
+    svg.selectAll(".path-collision")
+        .on("mouseover", () => tooltip.style("opacity", 1) )
         .on("mousemove", (event) => {
             // Obtenha a posição do mouse e converta em tempo
             const xPos = d3.pointer(event)[0];
@@ -70,7 +97,6 @@ async function main() {
                 .style("opacity", 1);
         })
         .on("mouseout", () => {
-            console.log("saiu")
             tooltip.style("opacity", 0);
         });
 
@@ -100,7 +126,8 @@ async function main() {
     
     svg.selectAll("dot")
         .data(chartData.filter(d => Number(d.question.value) !== 100))
-        .enter().append("circle")
+        .enter()
+        .append("circle")
         .attr("cx", d => x(d.date))
         .attr("cy", d => y(d.value))
         .attr("r", circle_small_radius)
@@ -124,45 +151,64 @@ async function main() {
         });
 
     const zoom = d3.zoom()
-        .scaleExtent([0.5, 150])
+        .scaleExtent([0.25, 150])
         .on("zoom", zoomed);
-        
-    svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
 
+    let dataPath = ""
+    let datasPath = []
     function zoomed({transform}) {
-        const zx = transform.rescaleX(x);
-        const zy = transform.rescaleY(y);
-        
-        gGrid.call(d3.axisLeft(zy).tickSize(-width).tickFormat("")).selectAll("line")
-            .attr("stroke", "rgba(200, 200, 200, 0.5)")
-            .attr("stroke-width", 1);
-        
-        gy.call(yAxis.scale(zy))
-        gx.call(xAxis.scale(zx))
-            .attr("transform", `translate(0,${height})`); // Mantém gx fixo na base
-        
-        svg.selectAll("circle")
-            .attr("cx", d => zx(d.date))
-            .attr("cy", d => zy(d.value));
+        requestAnimationFrame(() => {
+            const zx = transform.rescaleX(x);
+            const zy = transform.rescaleY(y);
+            
+            gGrid.call(d3.axisLeft(zy).tickSize(-width).tickFormat("")).selectAll("line")
+                .attr("stroke", "rgba(200, 200, 200, 0.8)")
+                .attr("stroke-width", 1);
+            
+            gy.call(yAxis.scale(zy))
+            gx.call(xAxis.scale(zx))
+                .attr("transform", `translate(0,${height})`); // Mantém gx fixo na base
+            
+            svg.selectAll("circle")
+                .attr("cx", d => zx(d.date))
+                .attr("cy", d => zy(d.value));
 
-        linePath.attr("d", chartData.map((d, i) => {
+            dataPath = chartData.map((d, i) => {
                 const xPos = zx(d.date);
                 const yPos = zy(d.value);
-    
+
                 if (i === 0) return `M ${xPos} ${yPos}`;
                 const prevY = zy(chartData[i - 1].value);
                 return `V ${prevY} H ${xPos} V ${yPos}`;
-            }).join(" "));
+            }).join(" ")
 
-        linePathCollision.attr("d", chartData.map((d, i) => {
-            const xPos = zx(d.date);
-            const yPos = zy(d.value);
+            datasPath = []
+            chartsData.forEach(chartData => {
+                let dataPath = chartData.map((d, i) => {
+                    const xPos = zx(d.date);
+                    const yPos = zy(d.value);
 
-            if (i === 0) return `M ${xPos} ${yPos}`;
-            const prevY = zy(chartData[i - 1].value);
-            return `V ${prevY} H ${xPos} V ${yPos}`;
-        }).join(" "));
+                    if (i === 0) return `M ${xPos} ${yPos}`;
+                    const prevY = zy(chartData[i - 1].value);
+                    return `V ${prevY} H ${xPos} V ${yPos}`;
+                }).join(" ")
+                datasPath.push(dataPath);
+            })
+
+            linePath.attr("d", dataPath);
+            linePathCollision.attr("d", dataPath);
+
+            linesPath.forEach((linePath, i) => {
+                linePath.attr("d", datasPath[i]);
+            })
+
+            linesPathCollision.forEach((linePath, i) => {
+                linePath.attr("d", datasPath[i]);
+            })
+        })
     }
+        
+    svg.call(zoom);
 
     svg.transition()
         .duration(750)
