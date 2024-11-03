@@ -14,6 +14,7 @@ export default class Markers {
         this.circles = this.svg.selectAll("dot")
             .data(markerData)
             .enter().append("circle")
+            .attr("class", "marker")
             .attr("cx", d => this.x(d.date))
             .attr("cy", d => this.y(d.value));
         return this;

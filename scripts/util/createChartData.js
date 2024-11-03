@@ -1,4 +1,4 @@
-function createChartData(data, type = "TEST") {
+function createChartData(student, data, type = "TEST") {
     // Filtra apenas as linhas com type no tipo
     const testData = data.filter(d => d.type === type);
 
@@ -11,7 +11,7 @@ function createChartData(data, type = "TEST") {
         accumulative = Object.values(question_acc).reduce((total, value ) => total + Number(value), 0);
         
         return {
-            question_id,
+            student: student,
             value: accumulative,
             date: new Date(question.date),
             question,

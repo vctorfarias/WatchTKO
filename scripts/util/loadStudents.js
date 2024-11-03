@@ -8,7 +8,7 @@ export default async function loadStudents() {
 
     for (let student of data.students) {
         const csvPath = `./scripts/data/${student.nick}/.tko/history.csv`;
-        const csvText = await d3.text(csvPath);  // Aguarda o carregamento do CSV
+        const csvText = await d3.text(csvPath);
         
         // Divide as linhas do CSV
         const rows = csvText.trim().split("\n");

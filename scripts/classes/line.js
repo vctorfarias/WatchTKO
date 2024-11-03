@@ -10,21 +10,31 @@ export default class Line {
         this.linePath = this.createLinePath(svg, student.color);
         this.linePathCollision = this.createLineCollision(svg);
         this.markers = [];
+        this.addMarkerQuestionComplete()
         this.addMarkerQuestionNotComplete()
-        console.log(this.markers)
     }
 
     addMarkerQuestionNotComplete() {
         let marker = new Markers(this.svg, this.x, this.y)
         marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) !== 100))
             .setRadius(4)
-            .setColor("green");
+            .setColor(this.student.color);
+
+        this.markers.push(marker);
+    }
+
+    addMarkerQuestionComplete() {
+        let marker = new Markers(this.svg, this.x, this.y)
+        marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) === 100))
+            .setRadius(5)
+            .setColor(this.student.color);
 
         this.markers.push(marker);
     }
 
     attrPathData(linePath, x, y) {
-        linePath.attr("d", this.chartData.map((d, i) => {
+        linePath
+        .attr("d", this.chartData.map((d, i) => {
             const xPos = x(d.date);
             const yPos = y(d.value);
 
@@ -40,7 +50,7 @@ export default class Line {
         const linePath = svg.append("path")
             .datum(this.chartData)
             .attr("fill", "none")
-            .attr("stroke", color)
+            .attr("stroke", this.student.color)
             .attr("stroke-width", stroke);
     
         this.attrPathData(linePath, this.x, this.y);
