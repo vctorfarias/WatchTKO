@@ -6,8 +6,23 @@
             "avatar": ""
         },
         {
-            "name": "João Pessoa",
-            "nick": "pessoa",
+            "name": "João Aluno da Silva",
+            "nick": "nick1",
+            "avatar": ""
+        },
+        {
+            "name": "Gustavo Estuda da Silva",
+            "nick": "nick2",
+            "avatar": ""
+        },
+        {
+            "name": "Joséscript da Silva",
+            "nick": "nick3",
+            "avatar": ""
+        },
+        {
+            "name": "Clarice Mais da Silva",
+            "nick": "nick3",
             "avatar": ""
         }
     ]

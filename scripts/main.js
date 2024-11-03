@@ -28,7 +28,7 @@ async function main() {
         .range([0, width]);
 
     const y = d3.scaleLinear()
-        .domain([0, d3.max(students[0].chartData, d => d.value) + 100])
+        .domain([0, 70])
         .range([height, 0]);
         
     // Criação dos eixos
@@ -36,7 +36,7 @@ async function main() {
         .ticks(d3.timeDay.every(0.8)) // Define intervalos de 1 dia
         .tickFormat(d3.timeFormat("%d/%m %H:%M")) // Formata as datas
     
-    const yAxis = d3.axisRight(y).ticks(10);
+    const yAxis = d3.axisRight(y).ticks(3);
         
     // Adiciona o Grid (as linhas)
     const gGrid = svg.append("g");
@@ -48,32 +48,30 @@ async function main() {
     
     const gx = svg.append("g");
     const gy = svg.append("g");
-    
+
+    /*
+    let isZoomingX = false; // Variável para controlar se o eixo X está bloqueado
+    let isZoomingY = false; // Variável para controlar se o eixo Y está bloqueado
+
+    const hitboxX = gx.append("rect")
+        .attr("x", 0) // Posição X do retângulo
+        .attr("y", -rectHeight) // Posição Y do retângulo
+        .attr("width", width) // Largura do retângulo (igual à largura do gráfico)
+        .attr("height", rectHeight) // Altura do retângulo
+        .attr("fill", "lightgrey") // Cor do retângulo
+        .attr("opacity", 1); // Opacidade do retângulo
+
+    const hitboxY = gy.append("rect")
+        .attr("x", 0) // Posição X do retângulo (para ficar à esquerda)
+        .attr("y", 0) // Posição Y do retângulo
+        .attr("width", rectWidth) // Largura do retângulo
+        .attr("height", height) // Altura do retângulo (igual à altura do gráfico)
+        .attr("fill", "lightgrey") // Cor do retângulo
+        .attr("opacity", 1); // Opacidade do retângulo
+    */
+
     // Tooltip de informações
-    svg.on("mousemove", (event) => {
-        const target = d3.select(event.target);
-
-        if (target.classed("path-collision")) {
-            const studentIndex = target.attr("data-student")
-            const xPos = d3.pointer(event)[0];
-            const date = x.invert(xPos);
-
-            tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Data: ${date.toLocaleString()}`) // Exibe o nome e nick do estudante
-                .style("display", "block")
-                .style("left", (event.pageX - 100) + "px")
-                .style("top", (event.pageY - 150) + "px")
-                .style("display", "block");
-        } else if (target.classed("marker")) {
-            const studentIndex = target.attr("data-student")
-            const d = target.datum()
-
-            tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Questão: @${d.question.command}:${d.question.value}<br>Data: ${d.date.toLocaleString()}`)
-                .style("left", (event.pageX - 100) + "px")
-                .style("top", (event.pageY - 150) + "px")
-                .style("display", "block");
-        }
-    })
-    .on("mouseout", (event) => {
+    svg.on("mouseout", (event) => {
         const target = d3.select(event.target);
         tooltip.style("display", "none")
         
@@ -82,43 +80,73 @@ async function main() {
     })
     .on("click", (event) => {
         const target = d3.select(event.target);
-        
+        const studentIndex = target.attr("data-student");
+
         if (target.classed("marker")) {
             const d = target.datum(); // Obtém os dados do marcador
-            window.open(`https://github.com/${d.student.nick}`, "_blank");
+            window.open(`https://github.com/${students[studentIndex].nick}`, "_blank");
         }
     });
     
     // Zoom
     const zoom = d3.zoom()
-        .scaleExtent([0.25, 150])
+        .scaleExtent([0.0001, 20])
         .on("zoom", zoomed);
-
+    
     function zoomed({transform}) {
-        requestAnimationFrame(() => {
-            const zx = transform.rescaleX(x);
-            const zy = transform.rescaleY(y);
-            
-            gGrid.call(d3.axisLeft(zy).tickSize(-width).tickSizeOuter(0).tickFormat("")).selectAll("line")
-                .attr("stroke", "rgba(200, 200, 200, 0.8)")
-                .attr("stroke-width", 1);
-            
-            gy.call(yAxis.scale(zy))
-            gx.call(xAxis.scale(zx))
-                .attr("transform", `translate(0,${height})`); // Mantém gx fixo na base
-            
+        let zx = transform.rescaleX(x);
+        let zy = transform.rescaleY(y);
+
             svg.selectAll("circle")
-                .attr("cx", d => zx(d.date))
+                .attr("cx", d => zx(d.date));
+
+            svg.selectAll("circle")
                 .attr("cy", d => zy(d.value));
-
-            lines.forEach(line => {
-                line.update(zx, zy)
-            })
-        })
-    }
         
-    svg.call(zoom);
 
+        gGrid.call(d3.axisLeft(zy).tickSize(-width).tickSizeOuter(0).tickFormat("")).selectAll("line")
+            .attr("stroke", "rgba(200, 200, 200, 0.8)")
+            .attr("stroke-width", 1);
+        
+        gy.call(yAxis.scale(zy))
+        gx.call(xAxis.scale(zx))
+            .attr("transform", `translate(0,${height})`); // Mantém gx fixo na base
+        
+
+
+        lines.forEach(line => {
+            line.update(zx, zy)
+        })
+
+        svg.on("mousemove", (event) => {
+            const target = d3.select(event.target);
+            let studentIndex, d;
+
+            if (target.classed("path-collision")) {
+                studentIndex = target.attr("data-student");
+                const xPos = d3.pointer(event)[0];
+
+                const transformedXPos = (xPos - transform.x) / transform.k;
+                const date = x.invert(transformedXPos);
+
+                tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Data: ${date.toLocaleString('pt-BR')}`)
+                    .style("display", "block")
+                    .style("left", (event.pageX - 100) + "px")
+                    .style("top", (event.pageY - 150) + "px");
+            } else if (target.classed("marker")) {
+                studentIndex = target.attr("data-student");
+                d = target.datum();
+                
+                tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Questão: @${d.question.command}:${d.question.value}<br>Data: ${d.date.toLocaleString('pt-BR')}`)
+                .style("left", (event.pageX - 100) + "px")
+                .style("top", (event.pageY - 150) + "px")
+                .style("display", "block")
+            }
+        });
+    }
+    
+    svg.call(zoom);
+        
     svg.transition()
         .duration(750)
         .call(zoom.transform, d3.zoomIdentity);   

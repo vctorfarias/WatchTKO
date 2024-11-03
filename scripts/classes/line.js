@@ -44,6 +44,30 @@ export default class Line {
         }).join(" "));
     }
 
+    attrPathDataX(linePath, x) {
+        linePath
+        .attr("d", this.chartData.map((d, i) => {
+            const xPos = x(d.date);
+            const yPos = y(d.value);
+
+            if (i === 0) return `M ${xPos} ${yPos}`;
+            const prevY = y(this.chartData[i - 1].value);
+            return `V ${prevY} H ${xPos} V ${yPos}`;
+        }).join(" "));
+    }
+
+    attrPathDataY(linePath, y) {
+        linePath
+        .attr("d", this.chartData.map((d, i) => {
+            const xPos = x(d.date);
+            const yPos = y(d.value);
+
+            if (i === 0) return `M ${xPos} ${yPos}`;
+            const prevY = y(this.chartData[i - 1].value);
+            return `V ${prevY} H ${xPos} V ${yPos}`;
+        }).join(" "));
+    }
+
     createLinePath(svg, options = {}) {
         const { color = "green", stroke = 3 } = options;
         const linePath = svg.append("path")
@@ -75,5 +99,15 @@ export default class Line {
     update(x, y) {
         this.attrPathData(this.linePathCollision, x, y)
         this.attrPathData(this.linePath, x, y)
+    }
+
+    updateX(x) {
+        this.attrPathDataX(this.linePathCollision, x)
+        this.attrPathDataX(this.linePath, x)
+    }
+
+    updateY(Y) {
+        this.attrPathDataX(this.linePathCollision, y)
+        this.attrPathDataX(this.linePath, y)
     }
 }

@@ -15,11 +15,20 @@
 - criar filtros;
 - criar uma segunda visualização do código usando o `.tko/daily.json`
 
-## Como usar?
+## Como testar?
 
-Coloque o `history.csv` na pasta `./scripts/data/vctorfarias/.tko` e adicione no topo do arquivo `hash,date,type,command,value` para realizar leitura dos dados das colunas
+Coloque o `.tko` na pasta `./scripts/data/{nick-do-github}`
 
-Ainda não é possível plotar o gráfico de vários alunos.
+Adicione os dados do aluno no arquivo `data.json`.
+```json
+{
+    "name": "Clarice Mais da Silva",
+    "nick": "nick3",
+    "avatar": ""
+}
+```
+
+Ainda preciso automatizar isso com outro script porque o JavaScript no Browser não tem acesso aos arquivos do sistema.
 
 ## Como eu gostaria de estruturar os arquivos
 
