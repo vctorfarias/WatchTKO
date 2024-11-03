@@ -3,8 +3,9 @@ const circle_small_radius = 3;
 //.data(chartData.filter(d => Number(d.question.value) !== 100))
 
 export default class Markers {
-    constructor(svg, x, y) {
+    constructor(svg, index, x, y) {
         this.svg = svg;
+        this.index = index;
         this.circles = undefined
         this.x = x;
         this.y = y;
@@ -15,8 +16,10 @@ export default class Markers {
             .data(markerData)
             .enter().append("circle")
             .attr("class", "marker")
+            .attr("class", "marker")
+            .attr("data-student", this.index)
             .attr("cx", d => this.x(d.date))
-            .attr("cy", d => this.y(d.value));
+            .attr("cy", d => this.y(d.value))
         return this;
     }
 

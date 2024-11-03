@@ -15,7 +15,7 @@ export default class Line {
     }
 
     addMarkerQuestionNotComplete() {
-        let marker = new Markers(this.svg, this.x, this.y)
+        let marker = new Markers(this.svg, this.student.index, this.x, this.y)
         marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) !== 100))
             .setRadius(4)
             .setColor(this.student.color);
@@ -24,7 +24,7 @@ export default class Line {
     }
 
     addMarkerQuestionComplete() {
-        let marker = new Markers(this.svg, this.x, this.y)
+        let marker = new Markers(this.svg, this.student.index, this.x, this.y)
         marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) === 100))
             .setRadius(5)
             .setColor(this.student.color);
@@ -46,12 +46,11 @@ export default class Line {
 
     createLinePath(svg, options = {}) {
         const { color = "green", stroke = 3 } = options;
-    
         const linePath = svg.append("path")
             .datum(this.chartData)
             .attr("fill", "none")
             .attr("stroke", this.student.color)
-            .attr("stroke-width", stroke);
+            .attr("stroke-width", stroke)
     
         this.attrPathData(linePath, this.x, this.y);
 
@@ -59,14 +58,14 @@ export default class Line {
     }
 
     createLineCollision(svg, options = {}) {
-        const { color = "rgba(0,0,0,0)", stroke = 20 } = options;
-    
+        const { color = "rgba(0,0,0,0)", stroke = 13 } = options;
         const linePath = svg.append("path")
             .datum(this.chartData)
             .attr("class", "path-collision")
             .attr("fill", "none")
             .attr("stroke", color)
             .attr("stroke-width", stroke)
+            .attr("data-student", this.student.index);
         
         this.attrPathData(linePath, this.x, this.y)
     

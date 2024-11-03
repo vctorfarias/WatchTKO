@@ -6,7 +6,8 @@ export default async function loadStudents() {
     const response = await fetch("./scripts/data/data.json");
     const data = await response.json();
 
-    for (let student of data.students) {
+    for (let i = 0; i < data.students.length; i++) {
+        const student = data.students[i];
         const csvPath = `./scripts/data/${student.nick}/.tko/history.csv`;
         const csvText = await d3.text(csvPath);
         
@@ -25,8 +26,8 @@ export default async function loadStudents() {
             }, {});
         });
 
-        students.push(new Student(student.nick, student.name, student.avatar, csvData))
-        console.log(`Dados do arquivo ${csvPath}:`, csvData);
+        students.push(new Student(i, student.nick, student.name, student.avatar, csvData))
+        console.log(`Aluno carregado: ${student.name}\npath: ${csvPath}`);
     }
 
     return students;

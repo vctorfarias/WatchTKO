@@ -1,5 +1,3 @@
-import createChartData from "./util/createChartData.js";
-import loadData from "./util/loadData.js"
 import Student from "./classes/student.js"
 import Line from "./classes/line.js"
 import Tooltip from "./classes/tooltip.js";
@@ -15,14 +13,15 @@ async function main() {
     const tooltip = d3.select(container)
         .append("div")
         .attr("class", "tooltip")
-        .style("opacity", 0)
         .style("position", "absolute")
         .style("background", "white")
         .style("border", "1px solid black")
-        .style("padding", "5px");
+        .style("padding", "5px")
+        .style("opacity", 1)
+        .style("display", "none");
         
     const students = await loadStudents();
-    
+
     // Configuração das escalas
     const x = d3.scaleTime()
         .domain(d3.extent(students[0].chartData, d => d.date))
@@ -42,7 +41,6 @@ async function main() {
     // Adiciona o Grid (as linhas)
     const gGrid = svg.append("g");
     
-    
     const lines = []
     students.forEach(student => {
         lines.push(new Line(svg, student, x, y));
@@ -50,41 +48,48 @@ async function main() {
     
     const gx = svg.append("g");
     const gy = svg.append("g");
-    svg.selectAll(".path-collision")
-        .on("mouseover", () => tooltip.style("opacity", 1) )
-        .on("mousemove", (event, d,) => {
-            // Obtenha a posição do mouse e converta em tempo
+    
+    // Tooltip de informações
+    svg.on("mousemove", (event) => {
+        const target = d3.select(event.target);
+
+        if (target.classed("path-collision")) {
+            const studentIndex = target.attr("data-student")
             const xPos = d3.pointer(event)[0];
             const date = x.invert(xPos);
-        
-            // Atualiza o conteúdo do tooltip
-            tooltip.html(`${d[0].student.name}<br>@${d[0].student.nick}<br>Data: ${date.toLocaleString()}`) // Adicione mais informações conforme necessário
-                .style("left", (event.pageX - 100) + "px")
-                .style("top", (event.pageY - 100) + "px")
-                tooltip.style("display", "block");
-        })
-        .on("mouseout", () => {
-            tooltip.style("display", "none");
-        });
 
-    svg.selectAll(".marker")
-        .on("click", (event, d) => {
-            window.open(`https://github.com/${d.student.nick}`, "_blank");
-        })
-        .on("mouseover", (event, d) => {
-            tooltip.html(`${d.student.name}<br>@${d.student.nick}<br>Questão: @${d.question.command}:${d.question.value}<br>Data: ${d.date.toLocaleString()}`)
+            tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Data: ${date.toLocaleString()}`) // Exibe o nome e nick do estudante
+                .style("display", "block")
                 .style("left", (event.pageX - 100) + "px")
                 .style("top", (event.pageY - 150) + "px")
-                tooltip.style("display", "block");
-        })
-        .on("mousemove", (event) => {
-            tooltip.style("left", (event.pageX - 100) + "px")
-                .style("top", (event.pageY - 150) + "px").style("opacity", 1);
-        })
-        .on("mouseout", () => {
-            tooltip.style("display", "none");
-        });
+                .style("display", "block");
+        } else if (target.classed("marker")) {
+            const studentIndex = target.attr("data-student")
+            const d = target.datum()
 
+            tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Questão: @${d.question.command}:${d.question.value}<br>Data: ${d.date.toLocaleString()}`)
+                .style("left", (event.pageX - 100) + "px")
+                .style("top", (event.pageY - 150) + "px")
+                .style("display", "block");
+        }
+    })
+    .on("mouseout", (event) => {
+        const target = d3.select(event.target);
+        tooltip.style("display", "none")
+        
+        if (target.classed("path-collision") || target.classed("marker")) {
+        }
+    })
+    .on("click", (event) => {
+        const target = d3.select(event.target);
+        
+        if (target.classed("marker")) {
+            const d = target.datum(); // Obtém os dados do marcador
+            window.open(`https://github.com/${d.student.nick}`, "_blank");
+        }
+    });
+    
+    // Zoom
     const zoom = d3.zoom()
         .scaleExtent([0.25, 150])
         .on("zoom", zoomed);
