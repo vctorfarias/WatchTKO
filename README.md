@@ -1,18 +1,15 @@
 # WatchTKO
 
-![exemplo](example.gif)
+![exemplo](example.png)
 
 ## TODO
 
 - desacoplar código criando funções e classes;
-- conseguir criar múltiplas linhas;
-- conseguir ler múltiplos arquivos de histórico.
-- criar uma classe só para processar os dados do `./history` adicionando no topo do texto `hash,date,type,command,value`;
   - validar o hash
+- criar filtros;
 - ultilizar a API do github para coletar os dados de nome e foto;
 - melhorar a interface gráfica;
 - otimizar o código com cache;
-- criar filtros;
 - criar uma segunda visualização do código usando o `.tko/daily.json`
 
 ## Como testar?

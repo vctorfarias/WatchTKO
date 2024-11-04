@@ -132,14 +132,14 @@ async function main() {
                 tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Data: ${date.toLocaleString('pt-BR')}`)
                     .style("display", "block")
                     .style("left", (event.pageX - 100) + "px")
-                    .style("top", (event.pageY - 150) + "px");
+                    .style("top", (event.pageY - 120) + "px");
             } else if (target.classed("marker")) {
                 studentIndex = target.attr("data-student");
                 d = target.datum();
                 
                 tooltip.html(`${students[studentIndex].name}<br>@${students[studentIndex].nick}<br>Questão: @${d.question.command}:${d.question.value}<br>Data: ${d.date.toLocaleString('pt-BR')}`)
                 .style("left", (event.pageX - 100) + "px")
-                .style("top", (event.pageY - 150) + "px")
+                .style("top", (event.pageY - 120) + "px")
                 .style("display", "block")
             }
         });
