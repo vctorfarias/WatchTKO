@@ -1,6 +1,6 @@
 # WatchTKO
 
-![exemplo](example.png)
+![exemplo](example.gif)
 
 ## TODO
 
