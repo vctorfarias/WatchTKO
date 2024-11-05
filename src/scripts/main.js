@@ -48,61 +48,42 @@ async function main() {
     
     const gx = svg.append("g");
     const gy = svg.append("g");
-
-    /*
-    let isZoomingX = false; // Variável para controlar se o eixo X está bloqueado
-    let isZoomingY = false; // Variável para controlar se o eixo Y está bloqueado
-
-    const hitboxX = gx.append("rect")
-        .attr("x", 0) // Posição X do retângulo
-        .attr("y", -rectHeight) // Posição Y do retângulo
-        .attr("width", width) // Largura do retângulo (igual à largura do gráfico)
-        .attr("height", rectHeight) // Altura do retângulo
-        .attr("fill", "lightgrey") // Cor do retângulo
-        .attr("opacity", 1); // Opacidade do retângulo
-
-    const hitboxY = gy.append("rect")
-        .attr("x", 0) // Posição X do retângulo (para ficar à esquerda)
-        .attr("y", 0) // Posição Y do retângulo
-        .attr("width", rectWidth) // Largura do retângulo
-        .attr("height", height) // Altura do retângulo (igual à altura do gráfico)
-        .attr("fill", "lightgrey") // Cor do retângulo
-        .attr("opacity", 1); // Opacidade do retângulo
-    */
-
+    let isFocus = false;
     // Tooltip de informações
     svg.on("mouseout", (event) => {
-        const target = d3.select(event.target);
         tooltip.style("display", "none")
-        
-        if (target.classed("path-collision") || target.classed("marker")) {
-        }
     })
     .on("click", (event) => {
         const target = d3.select(event.target);
         const studentIndex = target.attr("data-student");
-
-        if (target.classed("marker")) {
-            const d = target.datum(); // Obtém os dados do marcador
+        
+        if (target.classed("marker") && isFocus) {
             window.open(`https://github.com/${students[studentIndex].nick}`, "_blank");
         }
+        
+        if (target.classed("path-collision") || target.classed("marker")) {
+            lines.forEach(line => line.hide())
+            lines[studentIndex].show()
+            isFocus = true;
+        } else if (isFocus){
+            lines.forEach(line => line.show())
+            isFocus = false;
+        }
+        
     });
     
     // Zoom
     const zoom = d3.zoom()
         .scaleExtent([0.0001, 20])
         .on("zoom", zoomed);
-    
+
     function zoomed({transform}) {
         let zx = transform.rescaleX(x);
         let zy = transform.rescaleY(y);
 
-            svg.selectAll("circle")
-                .attr("cx", d => zx(d.date));
-
-            svg.selectAll("circle")
-                .attr("cy", d => zy(d.value));
-        
+        svg.selectAll("circle")
+            .attr("cy", d => zy(d.value))
+            .attr("cx", d => zx(d.date));
 
         gGrid.call(d3.axisLeft(zy).tickSize(-width).tickSizeOuter(0).tickFormat("")).selectAll("line")
             .attr("stroke", "rgba(200, 200, 200, 0.8)")
@@ -110,15 +91,12 @@ async function main() {
         
         gy.call(yAxis.scale(zy))
         gx.call(xAxis.scale(zx))
-            .attr("transform", `translate(0,${height})`); // Mantém gx fixo na base
-        
+            .attr("transform", `translate(0,${height})`);
 
+        lines.forEach(line => line.update(zx, zy))
 
-        lines.forEach(line => {
-            line.update(zx, zy)
-        })
-
-        svg.on("mousemove", (event) => {
+        // Tooltip de informações
+        svg.on("mousemove", event => {
             const target = d3.select(event.target);
             let studentIndex, d;
 
@@ -142,6 +120,7 @@ async function main() {
                 .style("top", (event.pageY - 120) + "px")
                 .style("display", "block")
             }
+            
         });
     }
     

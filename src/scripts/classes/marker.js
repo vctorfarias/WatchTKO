@@ -2,7 +2,7 @@ const circle_small_radius = 3;
 
 //.data(chartData.filter(d => Number(d.question.value) !== 100))
 
-export default class Markers {
+export default class Marker {
     constructor(svg, index, x, y) {
         this.svg = svg;
         this.index = index;
@@ -31,5 +31,13 @@ export default class Markers {
     setColor(color) {
         this.circles.attr("fill", color);
         return this;
+    }
+
+    hide() {
+        this.circles.style("display", "none");
+    }
+
+    show() {
+        this.circles.style("display", "block");
     }
 }

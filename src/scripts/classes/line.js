@@ -1,4 +1,4 @@
-import Markers from "./markers.js";
+import Marker from "./marker.js";
 
 export default class Line {
     constructor(svg, student, x, y) {
@@ -15,7 +15,7 @@ export default class Line {
     }
 
     addMarkerQuestionNotComplete() {
-        let marker = new Markers(this.svg, this.student.index, this.x, this.y)
+        let marker = new Marker(this.svg, this.student.index, this.x, this.y)
         marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) !== 100))
             .setRadius(4)
             .setColor(this.student.color);
@@ -24,7 +24,7 @@ export default class Line {
     }
 
     addMarkerQuestionComplete() {
-        let marker = new Markers(this.svg, this.student.index, this.x, this.y)
+        let marker = new Marker(this.svg, this.student.index, this.x, this.y)
         marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) === 100))
             .setRadius(5)
             .setColor(this.student.color);
@@ -33,30 +33,6 @@ export default class Line {
     }
 
     attrPathData(linePath, x, y) {
-        linePath
-        .attr("d", this.chartData.map((d, i) => {
-            const xPos = x(d.date);
-            const yPos = y(d.value);
-
-            if (i === 0) return `M ${xPos} ${yPos}`;
-            const prevY = y(this.chartData[i - 1].value);
-            return `V ${prevY} H ${xPos} V ${yPos}`;
-        }).join(" "));
-    }
-
-    attrPathDataX(linePath, x) {
-        linePath
-        .attr("d", this.chartData.map((d, i) => {
-            const xPos = x(d.date);
-            const yPos = y(d.value);
-
-            if (i === 0) return `M ${xPos} ${yPos}`;
-            const prevY = y(this.chartData[i - 1].value);
-            return `V ${prevY} H ${xPos} V ${yPos}`;
-        }).join(" "));
-    }
-
-    attrPathDataY(linePath, y) {
         linePath
         .attr("d", this.chartData.map((d, i) => {
             const xPos = x(d.date);
@@ -101,13 +77,19 @@ export default class Line {
         this.attrPathData(this.linePath, x, y)
     }
 
-    updateX(x) {
-        this.attrPathDataX(this.linePathCollision, x)
-        this.attrPathDataX(this.linePath, x)
+    hide() {
+        this.linePath.style("display", "none");
+        this.linePathCollision.style("display", "none");
+        this.markers.forEach(marker => {
+            marker.hide();
+        })
     }
-
-    updateY(Y) {
-        this.attrPathDataX(this.linePathCollision, y)
-        this.attrPathDataX(this.linePath, y)
+    
+    show() {
+        this.linePath.style("display", "block");
+        this.linePathCollision.style("display", "block");
+        this.markers.forEach(marker => {
+            marker.show();
+        })
     }
 }
