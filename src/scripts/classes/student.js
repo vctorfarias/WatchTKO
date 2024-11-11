@@ -1,4 +1,5 @@
 import createChartData from "../util/createChartData.js";
+import createChartDataSelf from "../util/createChartDataSelf.js";
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
 
 export default class Student {
