@@ -1,6 +1,11 @@
 {
     "students": [
         {
+            "name": "Clenda",
+            "nick": "clenda",
+            "avatar": ""
+        },
+        {
             "name": "Victor Farias",
             "nick": "vctorfarias",
             "avatar": ""

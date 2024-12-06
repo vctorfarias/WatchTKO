@@ -1,0 +1,8 @@
+{
+    "patches": [
+        {
+            "label": "2024-11-28_01-52-22",
+            "content": "class Adapter {\n    // car: Car;\n\n    constructor() {\n        // this.car = new Car();\n    }\n\n    enter(): void {\n        // this.car.enter();\n    }\n\n    leave(): void {\n        // this.car.leave();\n    }\n\n    fuel(gas: number): void {\n        // this.car.fuel(gas);\n    }\n\n    drive(km: number): void {\n        // this.car.drive(km);\n    }\n\n    show(): void {\n        // console.log(this.car.toString());\n    }\n}\n\nexport {Adapter};\n\nif (require.main === module) {\n    console.log(\"Rodando o arquivo do estudante\");\n}\n"
+        }
+    ]
+}

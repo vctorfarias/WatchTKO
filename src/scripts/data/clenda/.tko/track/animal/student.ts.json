@@ -1,0 +1,8 @@
+{
+    "patches": [
+        {
+            "label": "2024-11-28_01-52-12",
+            "content": "class Animal {\n\n    private especie: string = \"\";\n    private barulho: string = \"\";\n    private estagio: number = 0;\n    constructor(especie:string, barulho:string) {\n        this.especie = especie;\n        this.barulho = barulho;\n      }\n\n    envelhecer(qtd: number): void {\n        this.estagio += qtd;\n        if (this.estagio >= 4) {\n            this.estagio = 4;\n        console.log (`warning: ${this.especie} morreu`);\n        }\n    }\n    fazerBarulho(): string {\n        if(this.estagio == 0) {\n                return \"---\";\n        }\n\n        if(this.estagio == 4) {\n            return \"RIP\";\n        }\n\n        return this.barulho;\n    }\n    toString(): string {\n        return `${this.especie}:${this.estagio}:${this.barulho}`;\n    }\n}\n\nclass Adapter {\n    animal: Animal;\n    constructor(especie: string, barulho: string) {\n        //Inicializa o objeto animal com os valores passados e idade 0\n         this.animal = new Animal(especie, barulho);\n    }\n\n    // Envelhece qtd n\u00edveis\n    grow(qtd: number): void {\n         this.animal.envelhecer(qtd);\n    }\n\n    // retorna o barulho que o animal faz\n    noise(): void {\n         console.log(this.animal.fazerBarulho());\n    }\n\n    // mostra a representa\u00e7\u00e3o do animal como texto\n    // no formato \"{especie}:{estagio}:{barulho}\"\n    show(): void {\n         console.log(this.animal.toString());\n    }\n}\n\nexport {Adapter};"
+        }
+    ]
+}

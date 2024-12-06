@@ -4,7 +4,7 @@ export default class Line {
     constructor(svg, student, x, y) {
         this.svg = svg;
         this.student = student;
-        this.chartData = student.chartData;
+        this.chartData = student.dailyChartData;
         this.x = x;
         this.y = y;
         this.linePath = this.createLinePath(svg, student.color);
@@ -16,7 +16,7 @@ export default class Line {
 
     addMarkerQuestionNotComplete() {
         let marker = new Marker(this.svg, this.student.index, this.x, this.y)
-        marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) !== 100))
+        marker.setMarkerData(this.chartData)
             .setRadius(4)
             .setColor(this.student.color);
 
@@ -25,23 +25,21 @@ export default class Line {
 
     addMarkerQuestionComplete() {
         let marker = new Marker(this.svg, this.student.index, this.x, this.y)
-        marker.setMarkerData(this.chartData.filter(d => Number(d.question.value) === 100))
+        console.log("b", this.chartData)
+        marker.setMarkerData(this.chartData)
             .setRadius(5)
             .setColor(this.student.color);
-
+        
         this.markers.push(marker);
     }
 
     attrPathData(linePath, x, y) {
-        linePath
-        .attr("d", this.chartData.map((d, i) => {
-            const xPos = x(d.date);
-            const yPos = y(d.value);
-
-            if (i === 0) return `M ${xPos} ${yPos}`;
-            const prevY = y(this.chartData[i - 1].value);
-            return `V ${prevY} H ${xPos} V ${yPos}`;
-        }).join(" "));
+        const lineGenerator = d3.line()
+            .x(d => x(d.date))
+            .y(d => y(d.value))
+            .curve(d3.curveLinear);
+    
+        linePath.attr("d", lineGenerator(this.chartData));
     }
 
     createLinePath(svg, options = {}) {

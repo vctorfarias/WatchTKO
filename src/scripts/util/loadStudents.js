@@ -3,22 +3,23 @@ import Student from "../classes/student.js";
 export default async function loadStudents() {
     const students = [];
     
-    const response = await fetch("./scripts/data/data.json");
-    const data = await response.json();
+    const data = await d3.json("./scripts/data/data.json");
 
     for (let i = 0; i < data.students.length; i++) {
         const student = data.students[i];
-        const csvPath = `./scripts/data/${student.nick}/.tko/history.csv`;
-        const csvText = await d3.text(csvPath);
+        const path = `./scripts/data/${student.nick}/.tko`;
+        const historyPath = path + `/history.csv`;
+        const dailyPath = path + `/daily.json`;
+        const historyText = await d3.text(historyPath);
         
         // Divide as linhas do CSV
-        const rows = csvText.trim().split("\n");
+        const rows = historyText.trim().split("\n");
 
         // Define as chaves que você quer
         const keys = ["hash", "date", "type", "command", "value"];
 
         // Mapeia as linhas para objetos
-        const csvData = rows.map(row => {
+        const historyData = rows.map(row => {
             const values = row.split(",").map(value => value.trim());
             return keys.reduce((obj, key, index) => {
                 obj[key] = values[index];
@@ -26,8 +27,16 @@ export default async function loadStudents() {
             }, {});
         });
 
-        students.push(new Student(i, student.nick, student.name, student.avatar, csvData))
-        console.log(`Aluno carregado: ${student.name}\npath: ${csvPath}`);
+        
+        const dailyData = await d3.json(dailyPath);
+
+        student.data = {
+            history: historyData,
+            daily: dailyData
+        }
+
+        console.log(`Aluno carregado: ${student.name}\npath: ${path}`);
+        students.push(new Student(i, student.nick, student.name, student.avatar, student.data));
     }
 
     return students;

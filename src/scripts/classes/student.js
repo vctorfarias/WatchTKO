@@ -1,5 +1,6 @@
-import createChartData from "../util/createChartData.js";
-import createChartDataSelf from "../util/createChartDataSelf.js";
+import createHistoryChartData from "../util/createHistoryChartData.js";
+import createDailyChartData from "../util/createDailyChartData.js";
+
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
 
 export default class Student {
@@ -9,7 +10,7 @@ export default class Student {
         this.name = name;
         this.avatar = avatar;
         this.color = colorScale(nick);
-        this.data = data;
-        this.chartData = createChartData(this.data);
+        this.historyChartData = createHistoryChartData(data.history);
+        this.dailyChartData = createDailyChartData(data.daily);
     }
 }
